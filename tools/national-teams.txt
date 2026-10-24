@@ -1,5 +1,6 @@
-# id|English Wikipedia article (the national team, or its federation when the team article shows a flag).
-# each article's main image (the team badge) to logos/<id>.png.
+# id|English Wikipedia article (the national team, or its federation when the
+# team article shows a flag). The GitHub Action fetch-badges.yml downloads
+# each team's badge to logos/<id>.png.
 nt-england|England national football team
 nt-brazil|Brazil national football team
 nt-argentina|Argentina national football team

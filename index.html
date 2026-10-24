@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Badge Quiz</title>
+  <meta name="description" content="Guess the football club and country from its badge.">
+  <meta name="theme-color" content="#1b7a3a">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <!-- Home -->
+    <section id="home" class="screen">
+      <h1>⚽ Badge Quiz</h1>
+      <p class="tagline">Can you name the team from its badge?</p>
+
+      <div class="card">
+        <h2>Who’s playing?</h2>
+        <div id="players" class="players"></div>
+        <form id="new-player" class="new-player" hidden>
+          <div id="emoji-pick" class="emoji-pick"></div>
+          <input id="new-name" maxlength="14" placeholder="Your name" autocomplete="off" required>
+          <div class="row">
+            <button type="button" id="cancel-player" class="btn ghost">Cancel</button>
+            <button type="submit" class="btn">Add player</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Pick a level</h2>
+        <div class="modes">
+          <button class="mode easy" data-mode="easy">
+            <span class="mode-name">🟢 Easy</span>
+            <span class="mode-desc">The most famous teams in the world</span>
+            <span class="mode-best" data-best="easy"></span>
+          </button>
+          <button class="mode medium" data-mode="medium">
+            <span class="mode-name">🟡 Medium</span>
+            <span class="mode-desc">Famous teams plus some trickier ones</span>
+            <span class="mode-best" data-best="medium"></span>
+          </button>
+          <button class="mode hard" data-mode="hard">
+            <span class="mode-name">🔴 Hard</span>
+            <span class="mode-desc">Smaller teams, zoomed-in badges</span>
+            <span class="mode-best" data-best="hard"></span>
+          </button>
+          <button class="mode streak" data-mode="streak">
+            <span class="mode-name">🔥 Streak</span>
+            <span class="mode-desc">Keep going until you get one wrong</span>
+            <span class="mode-best" data-best="streak"></span>
+          </button>
+        </div>
+        <div class="answer-style">
+          <span>Answer by:</span>
+          <div class="toggle" role="radiogroup">
+            <button data-typing="false" role="radio">👆 Picking</button>
+            <button data-typing="true" role="radio">⌨️ Typing</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Question and reveal -->
+    <section id="play" class="screen" hidden>
+      <div class="topbar">
+        <button id="quit" class="btn ghost small" aria-label="Back to start">✕</button>
+        <div id="progress" class="progress"></div>
+        <div id="score" class="score"></div>
+      </div>
+
+      <div id="badge-box" class="badge-box">
+        <img id="badge" alt="Mystery badge">
+        <span id="zoom-tag" class="zoom-tag" hidden>🔍 Zoomed in</span>
+      </div>
+
+      <div id="choices" class="choices"></div>
+
+      <form id="typed" class="typed" hidden>
+        <input id="typed-answer" placeholder="Type the team name" autocomplete="off" autocapitalize="words" spellcheck="false">
+        <div class="row">
+          <button type="button" id="give-up" class="btn ghost">I don’t know</button>
+          <button type="submit" class="btn">Check</button>
+        </div>
+      </form>
+
+      <div id="reveal" class="reveal" hidden>
+        <p id="verdict" class="verdict"></p>
+        <p id="team-name" class="team-name"></p>
+        <p id="fact" class="fact"></p>
+        <button id="next" class="btn big">Next ➜</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="screen" hidden>
+      <div class="card center">
+        <p id="stars" class="stars"></p>
+        <h2 id="final-score"></h2>
+        <p id="final-msg"></p>
+        <p id="new-best" class="new-best" hidden>🏆 New best score!</p>
+        <div class="row">
+          <button id="home-btn" class="btn ghost">Home</button>
+          <button id="again" class="btn">Play again</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Your answers</h2>
+        <ul id="review" class="review"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="teams.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
