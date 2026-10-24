@@ -164,13 +164,33 @@ h2 { font-size: 1.15rem; margin: 0 0 12px; }
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
   margin-bottom: 14px;
 }
-.badge-box img {
-  max-width: 75%;
-  max-height: 82%;
+/* The stage holds the badge and the patches that cover its name, so they zoom together. */
+.stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
   transition: transform .6s ease;
 }
-.badge-box.zoomed img { transform: scale(2.2); }
-.badge-box.pop img { animation: pop .35s ease; }
+.stage img {
+  max-width: 75%;
+  max-height: 82%;
+}
+.badge-box.zoomed .stage { transform: scale(2.2); }
+.badge-box.pop .stage { animation: pop .35s ease; }
+.covers { position: absolute; pointer-events: none; }
+.cover {
+  position: absolute;
+  background: repeating-linear-gradient(45deg, #7d8799 0 5px, #9aa3b2 5px 10px);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  transition: opacity .4s ease;
+}
+.cover.ring { border-radius: 50%; }
+.covers.gone .cover { opacity: 0; }
 @keyframes pop { 50% { transform: scale(1.12); } }
 .zoom-tag {
   position: absolute; top: 10px; left: 10px; font-size: .8rem; font-weight: 700;

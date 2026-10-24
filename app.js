@@ -81,6 +81,71 @@ function typedAnswerMatches(input, team) {
   });
 }
 
+// ---------- Covering team names on badges ----------
+
+// Names are hidden from medium difficulty up, and always when typing (or it would be too easy).
+const coverNames = (difficulty) => difficulty >= 2 || game.typing;
+
+function inMask(m, x, y) {
+  if (m.length === 4) return x >= m[0] && x <= m[0] + m[2] && y >= m[1] && y <= m[1] + m[3];
+  const d = ((x - m[0]) / m[2]) ** 2 + ((y - m[1]) / m[3]) ** 2;
+  return d <= 1 && d >= m[4] ** 2;
+}
+
+function drawCovers(team, show) {
+  const layer = $("covers");
+  layer.innerHTML = "";
+  layer.classList.remove("gone");
+  if (!show) return;
+  for (const m of MASKS[team.id] || []) {
+    const c = document.createElement("div");
+    c.className = "cover";
+    if (m.length === 4) {
+      const [x, y, w, h] = m;
+      const pad = 1.5; // a little extra so no letter edges peek out when zoomed in
+      Object.assign(c.style, {
+        left: `${x - pad}%`, top: `${y - pad}%`, width: `${w + 2 * pad}%`, height: `${h + 2 * pad}%`,
+      });
+      if (w > 18 && h > 6) c.textContent = "?";
+    } else {
+      const [cx, cy, rx, ry, inner] = m;
+      c.classList.add("ring");
+      Object.assign(c.style, { left: `${cx - rx}%`, top: `${cy - ry}%`, width: `${rx * 2}%`, height: `${ry * 2}%` });
+      const hole = `radial-gradient(closest-side, transparent ${inner * 100}%, #000 ${inner * 100 + 0.5}%)`;
+      c.style.maskImage = hole;
+      c.style.webkitMaskImage = hole;
+    }
+    layer.appendChild(c);
+  }
+  fitCovers();
+}
+
+// Line the cover layer up exactly with the badge image.
+function fitCovers() {
+  const img = $("badge");
+  Object.assign($("covers").style, {
+    left: `${img.offsetLeft}px`, top: `${img.offsetTop}px`,
+    width: `${img.offsetWidth}px`, height: `${img.offsetHeight}px`,
+  });
+}
+
+// Zoom into a random spot on the badge, but not onto a hidden name.
+function zoomInto(team) {
+  const masks = MASKS[team.id] || [];
+  let x, y;
+  for (let tries = 0; tries < 20; tries++) {
+    x = 25 + Math.random() * 50;
+    y = 25 + Math.random() * 50;
+    if (!masks.some((m) => inMask(m, x, y))) break;
+  }
+  // The zoom is applied to the whole stage, so convert the spot to stage percentages.
+  const img = $("badge");
+  const stage = $("stage");
+  const sx = ((img.offsetLeft + (x / 100) * img.offsetWidth) / stage.offsetWidth) * 100;
+  const sy = ((img.offsetTop + (y / 100) * img.offsetHeight) / stage.offsetHeight) * 100;
+  stage.style.transformOrigin = `${sx}% ${sy}%`;
+}
+
 // ---------- Building a round ----------
 
 const byLevel = (level) => TEAMS.filter((t) => t.level === level);
@@ -170,20 +235,28 @@ function nextQuestion() {
   const upcoming = game.round[game.index + 1];
   if (upcoming) new Image().src = logoUrl(upcoming);
 
+  // Hide the badge until it has loaded, then cover its name and zoom in.
   const box = $("badge-box");
+  const stage = $("stage");
   const img = $("badge");
   const zoom = difficulty === 3;
   box.classList.remove("zoomed", "pop");
-  img.style.transition = "none";
-  if (zoom) {
-    const x = 25 + Math.random() * 50;
-    const y = 25 + Math.random() * 50;
-    img.style.transformOrigin = `${x}% ${y}%`;
-    box.classList.add("zoomed");
-  }
-  img.src = logoUrl(team);
-  void img.offsetWidth; // apply the zoom before turning the animation back on
-  img.style.transition = "";
+  stage.style.visibility = "hidden";
+  img.onload = () => {
+    stage.style.transition = "none";
+    drawCovers(team, coverNames(difficulty));
+    if (zoom) {
+      zoomInto(team);
+      box.classList.add("zoomed");
+    }
+    void stage.offsetWidth; // apply the zoom before turning the animation back on
+    stage.style.transition = "";
+    stage.style.visibility = "";
+  };
+  img.onerror = () => (stage.style.visibility = "");
+  const url = logoUrl(team);
+  if (img.getAttribute("src") === url && img.complete) img.onload();
+  else img.src = url;
   $("zoom-tag").hidden = !zoom;
 
   $("reveal").hidden = true;
@@ -247,6 +320,7 @@ function answer(correct, button) {
 
   const box = $("badge-box");
   box.classList.remove("zoomed");
+  $("covers").classList.add("gone");
   if (correct) {
     box.classList.add("pop");
     burst();
@@ -484,5 +558,6 @@ $("quit").addEventListener("click", () => {
 });
 $("again").addEventListener("click", () => startGame(game.mode));
 $("home-btn").addEventListener("click", () => { renderHome(); show("home"); });
+window.addEventListener("resize", fitCovers);
 
 renderHome();

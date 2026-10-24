@@ -7,6 +7,9 @@ A football badge quiz for the family. Name the club or country from its badge.
 - **Hard**: smaller clubs and countries, a zoomed-in badge, and wrong answers from the same league.
 - **Streak**: keep going until you get one wrong. It gets harder as you go.
 
+In medium and hard, and whenever answers are typed, any team name written on a badge is covered
+with a striped patch until the answer is given. The covered areas are listed in `masks.js`.
+
 Each round has 10 badges and no timer. After every answer you see the full badge and a fun fact.
 Players pick a name and emoji, and their best scores are saved in that browser.
 Switch **Answer by** to **Typing** to type team names instead. Small spelling mistakes are allowed.
