@@ -23,6 +23,7 @@ def get(url):
 
 
 def main():
+    (ROOT / "logos").mkdir(exist_ok=True)
     failed = []
     for line in (ROOT / "tools/national-teams.txt").read_text().splitlines():
         if not line.strip() or line.startswith("#"):
@@ -41,7 +42,7 @@ def main():
         if not thumb:
             failed.append(title)
             continue
-        if not thumb.lower().endswith(".png"):
+        if not thumb.split("?")[0].lower().endswith(".png"):
             print(f"note: {team_id} image is not a PNG: {thumb}")
         out.write_bytes(get(thumb))
         print(f"{team_id}: {page.get('pageimage')}")
