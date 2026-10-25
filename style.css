@@ -44,6 +44,7 @@ h1 {
 }
 
 .tagline { color: #e6f4ea; text-align: center; margin: 4px 0 18px; }
+.version { color: #e6f4ea; opacity: .7; text-align: center; font-size: .8rem; margin: 0; }
 
 h2 { font-size: 1.15rem; margin: 0 0 12px; }
 
