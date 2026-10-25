@@ -5,6 +5,8 @@ A football badge quiz for the family. Name the club or country from its badge.
 - **Easy**: the most famous clubs and countries, with 4 answers to pick from.
 - **Medium**: famous teams plus well-known ones from the big European leagues and the A-League.
 - **Hard**: smaller clubs and countries, a zoomed-in badge, and wrong answers from the same league.
+- **Extreme**: the hardest teams with 6 answers, all from the same league, and a twist on every badge:
+  a black shadow of its outline, a super zoom in black and white, or a quick look before it vanishes.
 - **Streak**: keep going until you get one wrong. It gets harder as you go.
 
 In medium and hard, and whenever answers are typed, any team name written on a badge is covered

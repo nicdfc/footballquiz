@@ -2,7 +2,27 @@
 
 const ROUND_LENGTH = 10;
 const EMOJIS = ["⚽", "🦁", "🐯", "🦊", "🐼", "🦄", "🐸", "🚀", "⭐", "🔥", "👑", "🐲"];
-const MODE_NAMES = { easy: "Easy", medium: "Medium", hard: "Hard", streak: "Streak" };
+const MODE_NAMES = { easy: "Easy", medium: "Medium", hard: "Hard", extreme: "Extreme", streak: "Streak" };
+
+// Extreme mode gives each badge one twist.
+const TWISTS = {
+  shadow: "🌑 Shadow",     // only the black outline of the badge
+  superzoom: "🔍 Super zoom", // zoomed right in, in black and white
+  flash: "⚡ Quick look",   // the badge vanishes after FLASH_MS
+};
+const FLASH_MS = 2000;
+// Badges with an outline you can recognise in shadow (they fill less than 70% of their frame).
+// Ones made only of letters with no cover over them are left out.
+const SHADOW_BADGES = new Set([
+  "aberdeen", "anderlecht", "auckland-fc", "basel", "benfica", "braga", "celta", "club-brugge", "como",
+  "crystal-palace", "espanyol", "fiorentina", "gladbach", "hibernian", "juventus", "koln", "lazio", "leipzig",
+  "lille", "liverpool", "mallorca", "man-united", "monaco", "nantes", "newcastle", "nice", "nottm-forest",
+  "nt-argentina", "nt-belgium", "nt-brazil", "nt-canada", "nt-croatia", "nt-england", "nt-france", "nt-germany",
+  "nt-morocco", "nt-new-zealand", "nt-northern-ireland", "nt-portugal", "nt-sweden", "nt-uruguay", "olympiacos",
+  "osasuna", "perth-glory", "porto", "psv", "real-betis", "real-madrid", "real-sociedad", "red-star", "roma",
+  "saint-etienne", "salzburg", "sevilla", "southampton", "sporting", "sunderland", "tottenham", "udinese",
+  "villarreal", "watford", "werder", "wsw",
+]);
 const STORE_KEY = "badgeQuiz.v1";
 
 const $ = (id) => document.getElementById(id);
@@ -160,6 +180,10 @@ function buildRound(mode) {
     const medium = pick(byLevel(2), 3);
     return shuffle([...medium, ...pick(byLevel(3), ROUND_LENGTH - medium.length)]);
   }
+  if (mode === "extreme") {
+    const medium = pick(byLevel(2), 2);
+    return shuffle([...medium, ...pick(byLevel(3), ROUND_LENGTH - medium.length)]);
+  }
   return []; // streak picks one at a time
 }
 
@@ -173,10 +197,17 @@ function nextStreakTeam(seen) {
   return pick(pool, 1)[0];
 }
 
+function pickTwist(team) {
+  const options = SHADOW_BADGES.has(team.id) ? ["shadow", "superzoom", "flash"] : ["superzoom", "flash"];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
 // Wrong answers: same kind (club or country). Harder levels use teams from the same league.
+// Extreme has 6 answers to pick from instead of 4.
 function buildChoices(team, difficulty) {
   const sameKind = TEAMS.filter((t) => t.id !== team.id && isNation(t) === isNation(team));
   const exclude = new Set([team.id]);
+  const count = difficulty === 4 ? 5 : 3;
   let wrong;
   if (difficulty === 1) {
     wrong = pick(sameKind.filter((t) => t.level === 1), 3, exclude);
@@ -185,13 +216,13 @@ function buildChoices(team, difficulty) {
     sameGroup.forEach((t) => exclude.add(t.id));
     wrong = [...sameGroup, ...pick(sameKind.filter((t) => t.level <= 2), 3 - sameGroup.length, exclude)];
   } else {
-    const sameGroup = pick(sameKind.filter((t) => t.group === team.group), 3, exclude);
+    const sameGroup = pick(sameKind.filter((t) => t.group === team.group), count, exclude);
     sameGroup.forEach((t) => exclude.add(t.id));
-    wrong = [...sameGroup, ...pick(sameKind, 3 - sameGroup.length, exclude)];
+    wrong = [...sameGroup, ...pick(sameKind, count - sameGroup.length, exclude)];
   }
-  if (wrong.length < 3) {
+  if (wrong.length < count) {
     wrong.forEach((t) => exclude.add(t.id));
-    wrong = wrong.concat(pick(sameKind, 3 - wrong.length, exclude));
+    wrong = wrong.concat(pick(sameKind, count - wrong.length, exclude));
   }
   return shuffle([team, ...wrong]);
 }
@@ -218,6 +249,7 @@ function difficultyFor(team) {
   if (game.mode === "easy") return 1;
   if (game.mode === "medium") return 2;
   if (game.mode === "hard") return 3;
+  if (game.mode === "extreme") return 4;
   return team.level; // streak
 }
 
@@ -239,8 +271,10 @@ function nextQuestion() {
   const box = $("badge-box");
   const stage = $("stage");
   const img = $("badge");
-  const zoom = difficulty === 3;
-  box.classList.remove("zoomed", "pop");
+  const twist = difficulty === 4 ? pickTwist(team) : null;
+  const zoom = difficulty === 3 || twist === "superzoom";
+  clearTimeout(game.flashTimer);
+  box.classList.remove("zoomed", "pop", "superzoom", "shadow", "flash", "gone");
   stage.style.visibility = "hidden";
   img.onload = () => {
     stage.style.transition = "none";
@@ -249,15 +283,20 @@ function nextQuestion() {
       zoomInto(team);
       box.classList.add("zoomed");
     }
+    if (twist) box.classList.add(twist);
     void stage.offsetWidth; // apply the zoom before turning the animation back on
     stage.style.transition = "";
     stage.style.visibility = "";
+    if (twist === "flash") {
+      game.flashTimer = setTimeout(() => !game.answered && box.classList.add("gone"), FLASH_MS);
+    }
   };
   img.onerror = () => (stage.style.visibility = "");
   const url = logoUrl(team);
   if (img.getAttribute("src") === url && img.complete) img.onload();
   else img.src = url;
-  $("zoom-tag").hidden = !zoom;
+  $("zoom-tag").textContent = twist ? TWISTS[twist] : "🔍 Zoomed in";
+  $("zoom-tag").hidden = !zoom && !twist;
 
   $("reveal").hidden = true;
   updateTopbar();
@@ -319,7 +358,8 @@ function answer(correct, button) {
   }
 
   const box = $("badge-box");
-  box.classList.remove("zoomed");
+  clearTimeout(game.flashTimer);
+  box.classList.remove("zoomed", "superzoom", "shadow", "flash", "gone");
   $("covers").classList.add("gone");
   if (correct) {
     box.classList.add("pop");

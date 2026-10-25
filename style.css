@@ -133,6 +133,8 @@ h2 { font-size: 1.15rem; margin: 0 0 12px; }
 .mode.medium { background: #fff1c2; }
 .mode.hard { background: #ffd9da; }
 .mode.streak { background: #ffe2cc; }
+.mode.extreme { background: #1d2433; color: #fff; grid-column: 1 / -1; min-height: 0; }
+.mode.extreme .mode-desc { color: #c3c9d4; }
 .mode-name { font-weight: 800; font-size: 1.15rem; }
 .mode-desc { font-size: 0.85rem; color: var(--muted); }
 .mode-best { margin-top: auto; font-size: 0.85rem; font-weight: 700; }
@@ -168,8 +170,9 @@ h2 { font-size: 1.15rem; margin: 0 0 12px; }
 .stage {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform .6s ease;
 }
 .stage img {
@@ -177,6 +180,24 @@ h2 { font-size: 1.15rem; margin: 0 0 12px; }
   max-height: 82%;
 }
 .badge-box.zoomed .stage { transform: scale(2.2); }
+.stage img { transition: filter .5s ease; }
+
+/* Extreme mode twists */
+.badge-box.superzoom .stage { transform: scale(3.4); }
+.badge-box.superzoom img { filter: grayscale(1) contrast(1.1); }
+.badge-box.shadow img { filter: brightness(0); }
+.badge-box.shadow .cover { background: #1d2433; color: #1d2433; }
+.badge-box.gone .stage { opacity: 0; transition: opacity .25s ease; }
+.badge-box.flash::after {
+  content: "👀 Gone! What was it?";
+  position: absolute;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.badge-box.flash.gone::after { opacity: 1; }
 .badge-box.pop .stage { animation: pop .35s ease; }
 .covers { position: absolute; pointer-events: none; }
 .cover {
