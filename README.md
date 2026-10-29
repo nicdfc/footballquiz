@@ -8,6 +8,8 @@ A football badge quiz for the family. Name the club or country from its badge.
 - **Extreme**: the hardest teams with 6 answers, all from the same league, and a twist on every badge:
   a black shadow of its outline, a super zoom in black and white, or a quick look before it vanishes.
 - **Streak**: keep going until you get one wrong. It gets harder as you go.
+- **Super Streak**: a streak over 224 teams from 27 leagues, including 108 extra clubs that only appear
+  here. From the 6th badge on, every badge gets an Extreme twist and 6 answers from the same league.
 
 In medium and hard, and whenever answers are typed, any team name written on a badge is covered
 with a striped patch until the answer is given. The covered areas are listed in `masks.js`.
@@ -24,7 +26,7 @@ then pick the branch and the `/ (root)` folder.
 
 ## Adding or changing teams
 
-Teams are listed in `teams.js`. Each one has a `level` (1 easy, 2 medium, 3 hard), a `group`
+Teams are listed in `teams.js`. Each one has a `level` (1 easy, 2 medium, 3 hard, 4 Super Streak only), a `group`
 (the league, used for tricky wrong answers), other accepted names and a fun fact.
 Its badge must be at `logos/<id>.png`.
 

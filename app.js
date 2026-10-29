@@ -2,7 +2,10 @@
 
 const ROUND_LENGTH = 10;
 const EMOJIS = ["⚽", "🦁", "🐯", "🦊", "🐼", "🦄", "🐸", "🚀", "⭐", "🔥", "👑", "🐲"];
-const MODE_NAMES = { easy: "Easy", medium: "Medium", hard: "Hard", extreme: "Extreme", streak: "Streak" };
+const MODE_NAMES = {
+  easy: "Easy", medium: "Medium", hard: "Hard", extreme: "Extreme", streak: "Streak", superstreak: "Super Streak",
+};
+const isStreak = (mode) => mode === "streak" || mode === "superstreak";
 
 // Extreme mode gives each badge one twist.
 const TWISTS = {
@@ -191,9 +194,23 @@ function buildRound(mode) {
 function nextStreakTeam(seen) {
   const n = seen.size;
   const levels = n < 5 ? [1] : n < 12 ? [1, 2] : n < 20 ? [2, 3] : [3];
+  return pickUnseen(levels, [1, 2, 3], seen);
+}
+
+// Super Streak uses every club, including the extra level-4 ones, and gets harder sooner.
+function nextSuperStreakTeam(seen) {
+  const n = seen.size;
+  const levels = n < 5 ? [2, 3] : n < 15 ? [3, 4] : [4];
+  return pickUnseen(levels, [2, 3, 4], seen);
+}
+
+function pickUnseen(levels, fallbackLevels, seen) {
   let pool = TEAMS.filter((t) => levels.includes(t.level) && !seen.has(t.id));
-  if (!pool.length) pool = TEAMS.filter((t) => !seen.has(t.id));
-  if (!pool.length) { seen.clear(); pool = TEAMS; }
+  if (!pool.length) pool = TEAMS.filter((t) => fallbackLevels.includes(t.level) && !seen.has(t.id));
+  if (!pool.length) {
+    seen.clear();
+    pool = TEAMS.filter((t) => fallbackLevels.includes(t.level));
+  }
   return pick(pool, 1)[0];
 }
 
@@ -250,14 +267,19 @@ function difficultyFor(team) {
   if (game.mode === "medium") return 2;
   if (game.mode === "hard") return 3;
   if (game.mode === "extreme") return 4;
+  // Super Streak: zoomed badges and same-league answers at first, extreme twists from the 6th badge.
+  if (game.mode === "superstreak") return game.answers.length < 5 ? 3 : 4;
   return team.level; // streak
 }
 
 function nextQuestion() {
   game.index++;
-  if (game.mode !== "streak" && game.index >= game.round.length) return finishGame();
+  if (!isStreak(game.mode) && game.index >= game.round.length) return finishGame();
 
-  const team = game.mode === "streak" ? nextStreakTeam(game.seen) : game.round[game.index];
+  const team =
+    game.mode === "streak" ? nextStreakTeam(game.seen) :
+    game.mode === "superstreak" ? nextSuperStreakTeam(game.seen) :
+    game.round[game.index];
   game.seen.add(team.id);
   game.team = team;
   game.answered = false;
@@ -327,8 +349,8 @@ function nextQuestion() {
 }
 
 function updateTopbar() {
-  if (game.mode === "streak") {
-    $("progress").innerHTML = `🔥 Streak`;
+  if (isStreak(game.mode)) {
+    $("progress").innerHTML = game.mode === "streak" ? `🔥 Streak` : `☄️ Super Streak`;
     $("score").textContent = `${game.score}`;
   } else {
     const done = game.index + (game.answered ? 1 : 0);
@@ -373,8 +395,8 @@ function answer(correct, button) {
   $("team-name").textContent = correct ? team.name : `It was ${team.name}`;
   $("fact").textContent = team.fact;
 
-  const streakOver = game.mode === "streak" && !correct;
-  const lastQuestion = game.mode !== "streak" && game.index === game.round.length - 1;
+  const streakOver = isStreak(game.mode) && !correct;
+  const lastQuestion = !isStreak(game.mode) && game.index === game.round.length - 1;
   $("next").textContent = streakOver || lastQuestion ? "See my score ➜" : "Next ➜";
   $("reveal").hidden = false;
   updateTopbar();
@@ -388,7 +410,7 @@ function pickPraise() {
 }
 
 function onNext() {
-  if (game.mode === "streak" && !game.answers[game.answers.length - 1].correct) return finishGame();
+  if (isStreak(game.mode) && !game.answers[game.answers.length - 1].correct) return finishGame();
   nextQuestion();
 }
 
@@ -406,8 +428,9 @@ function finishGame() {
   }
 
   const to = player ? `, ${player.name}` : ""; // "Great run, Sam!" or just "Great run!"
-  if (mode === "streak") {
-    $("stars").textContent = score >= 20 ? "🔥🔥🔥" : score >= 10 ? "🔥🔥" : "🔥";
+  if (isStreak(mode)) {
+    const icon = mode === "streak" ? "🔥" : "☄️";
+    $("stars").textContent = icon.repeat(score >= 20 ? 3 : score >= 10 ? 2 : 1);
     $("final-score").textContent = `${score} in a row`;
     $("final-msg").textContent =
       score >= 20 ? `Badge legend${to}!` :
@@ -540,7 +563,8 @@ function renderBests() {
     const mode = el.dataset.best;
     const best = player ? player.best[bestKey(mode, store.typing)] : undefined;
     el.textContent = !player || best === undefined ? "" :
-      mode === "streak" ? `Best: ${best} 🔥` : `Best: ${best}/${ROUND_LENGTH}`;
+      mode === "streak" ? `Best: ${best} 🔥` :
+      mode === "superstreak" ? `Best: ${best} ☄️` : `Best: ${best}/${ROUND_LENGTH}`;
   }
 }
 
