@@ -134,13 +134,11 @@ h2 { font-size: 1.15rem; margin: 0 0 12px; }
 .mode.medium { background: #fff1c2; }
 .mode.hard { background: #ffd9da; }
 .mode.streak { background: #ffe2cc; }
-.mode.extreme { background: #1d2433; color: #fff; grid-column: 1 / -1; min-height: 0; }
+.mode.extreme { background: #1d2433; color: #fff; }
 .mode.extreme .mode-desc { color: #c3c9d4; }
 .mode.superstreak {
   background: linear-gradient(120deg, #4a1d6b, #b3261e);
   color: #fff;
-  grid-column: 1 / -1;
-  min-height: 0;
 }
 .mode.superstreak .mode-desc { color: #f1dcef; }
 .mode-name { font-weight: 800; font-size: 1.15rem; }

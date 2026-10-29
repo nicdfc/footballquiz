@@ -7,7 +7,7 @@
   <meta name="description" content="Guess the football club and country from its badge.">
   <meta name="theme-color" content="#1b7a3a">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
-  <link rel="stylesheet" href="style.css?v=1.2">
+  <link rel="stylesheet" href="style.css?v=1.2.1">
 </head>
 <body>
   <main id="app">
@@ -47,19 +47,19 @@
             <span class="mode-desc">Smaller teams, zoomed-in badges</span>
             <span class="mode-best" data-best="hard"></span>
           </button>
+          <button class="mode extreme" data-mode="extreme">
+            <span class="mode-name">💀 Extreme</span>
+            <span class="mode-desc">Shadows, super zooms and vanishing badges</span>
+            <span class="mode-best" data-best="extreme"></span>
+          </button>
           <button class="mode streak" data-mode="streak">
             <span class="mode-name">🔥 Streak</span>
             <span class="mode-desc">Keep going until you get one wrong</span>
             <span class="mode-best" data-best="streak"></span>
           </button>
-          <button class="mode extreme" data-mode="extreme">
-            <span class="mode-name">💀 Extreme</span>
-            <span class="mode-desc">Shadows, super zooms and badges that vanish. 6 answers, all from the same league.</span>
-            <span class="mode-best" data-best="extreme"></span>
-          </button>
           <button class="mode superstreak" data-mode="superstreak">
             <span class="mode-name">☄️ Super Streak</span>
-            <span class="mode-desc">How long can you last? Over 200 teams from 27 leagues, and it gets brutal fast.</span>
+            <span class="mode-desc">200+ teams. How long can you last?</span>
             <span class="mode-best" data-best="superstreak"></span>
           </button>
         </div>
@@ -71,7 +71,7 @@
           </div>
         </div>
       </div>
-      <!-- When changing the version, change the ?v= on the style and script links too, so browsers fetch the new files. -->
+      <!-- Whenever style.css or a script changes, change the ?v= on its link too, so browsers fetch the new file. -->
       <p class="version">v1.2</p>
     </section>
 
@@ -128,8 +128,8 @@
     </section>
   </main>
 
-  <script src="teams.js?v=1.2"></script>
-  <script src="masks.js?v=1.2"></script>
-  <script src="app.js?v=1.2"></script>
+  <script src="teams.js?v=1.2.1"></script>
+  <script src="masks.js?v=1.2.1"></script>
+  <script src="app.js?v=1.2.1"></script>
 </body>
 </html>
